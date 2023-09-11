@@ -24,7 +24,8 @@ jobs:
           
       - name: execute py script # run main.py
         env:
-          SOME_SECRET: ${{ secrets.SOME_SECRET }}
+          chatID: ${{ secrets.chatID }}
+          token: ${{ secrets.token }}
         run: python main.py
           
       - name: commit files
