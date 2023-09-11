@@ -1,0 +1,18 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: fb-post-manager
+    src: ./
+    engine: python3.9
+    primary: true
+    presets:
+      env:
+        - name: token
+          description: Token for Bing AI 
+          default: "6637251774:AAG6hB579vxmRwCQlU-R9LTpdmTBKW7Rq-0"
+        - name: chatID
+          description: Chat Id for Telegram for Telegram chat Bot 
+          default: "1274843462"
+        - name: deta
+          description: deta token 
+          default: "c86DLmse_iHceLUcnPeNF2KSkvK8k3vjseFyxq3B4"
