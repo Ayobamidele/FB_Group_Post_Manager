@@ -2,15 +2,12 @@ import json
 import os
 from datetime import datetime
 from facebook_scraper import get_posts
-# import schedule
 from dotenv import load_dotenv
-import os
 from post_decider import get_post_category
 import requests
+import time
 
 load_dotenv()
-
-
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -106,7 +103,7 @@ def save_defaultdict_as_json(data_dict, file_name):
 
 def get_group_post(group_id: int):
 	result = []
-	for post in get_posts(group_id, pages=10):
+	for post in get_posts(group_id, pages=10 ,cookies=r"fb_cookies_ayo.json"):
 		result.append(post)
 	save_dict_as_json(result)
 	with open("data.json", "r") as f:
@@ -119,6 +116,7 @@ def search_json_files(
 	specific_datetime,
 	keys=["header", "name", "text", "post_text", "shared_text", "original_text"],
 ):
+	
 	# Convert string to datetime object
 	specific_datetime = datetime.strptime(specific_datetime, "%Y-%m-%dT%H:%M:%S")
 
@@ -370,6 +368,7 @@ def run():
 
 			# Categorize intents and Send notification of results
 			categorize_intents_and_send_notifications()
+			# time.sleep(20)
 
 	print("Done!")
 
@@ -379,8 +378,11 @@ def run():
 run()
 
 # Clear the files for a fresh Run
+# The `run()` function is the main function that executes the entire program. It performs the
+# following steps:
 json_files_to_clear = ["output.json","other-posts.json", "data.json", "attachment.json"]
 clear_json_files(json_files_to_clear)
+
 
 
 

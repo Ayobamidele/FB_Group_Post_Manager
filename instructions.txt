@@ -1,0 +1,4 @@
+source /home/Bami/.virtualenvs/fb_group_post_manager_venv/bin/activate
+cd /home/Bami/FB_Group_Post_Manager
+python main.py
+deactivate
