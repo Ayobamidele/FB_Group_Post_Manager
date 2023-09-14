@@ -5,10 +5,8 @@ from facebook_scraper import get_posts
 from dotenv import load_dotenv
 from post_decider import get_post_category
 import requests
-import time
 
 load_dotenv()
-
 
 class DateTimeEncoder(json.JSONEncoder):
 	def default(self, obj):
@@ -164,7 +162,7 @@ def search_json_files(
 				last_post["time"], "%Y-%m-%dT%H:%M:%S"
 			):
 				last_post = item
-	return results, last_post["time"]
+	return results, last_post.get("time", specific_datetime.strftime('%Y-%m-%dT%H:%M:%S'))
 
 
 def process_intents(list_of_dicts):
@@ -353,31 +351,31 @@ def main():
 			group_last_post_time = item["last_post_time"]
 
 			# Try to get the post but send notification to Telegraam if an error occurs 
-			try:
-				# Use the get_group_post function to get the group posts
-				data = get_group_post(group_id)
+			# try:
+			# Use the get_group_post function to get the group posts
+			data = get_group_post(group_id)
 
-				# Search the JSON file to get te most recent posts using datetime_treshold and return last post time
-				datetime_threshold = group_last_post_time
-				results, last_post_time = search_json_files(data, datetime_threshold)
+			# Search the JSON file to get te most recent posts using datetime_treshold and return last post time
+			datetime_threshold = group_last_post_time
+			results, last_post_time = search_json_files(data, datetime_threshold)
 
-				# Process the Intents of post
-				process_intents(results)
+			# Process the Intents of post
+			process_intents(results)
 
-				#Removes any single quotes from code
-				process_json('output.json')
+			#Removes any single quotes from code
+			process_json('output.json')
 
-				# Categorize intents and Send notification of results
-				categorize_intents_and_send_notifications()
-				
-				# Update last post time
-				update_last_post_time(file_path, group_id, last_post_time)
-				
-				# Clear the json files for a new group
-				json_files_to_clear = ["output.json","other-posts.json", "data.json", "attachment.json"]
-				clear_json_files(json_files_to_clear)
-			except Exception as e:
-				send_to_telegram(f"There seems to be an error with Group - {group_id} while scraping fro this time treshold - {group_last_post_time}.Please, try to fix before next cycle. \n Heres the error message: {e}")
+			# Categorize intents and Send notification of results
+			categorize_intents_and_send_notifications()
+			
+			# Update last post time
+			update_last_post_time(file_path, group_id, last_post_time)
+			
+			# Clear the json files for a new group
+			json_files_to_clear = ["output.json","other-posts.json", "data.json", "attachment.json"]
+			clear_json_files(json_files_to_clear)
+			# except Exception as e:
+				# send_to_telegram(f"There seems to be an error with Group - {group_id} while scraping fro this time threshold - {group_last_post_time}.Please, try to fix before next cycle. \n Heres the error message: {e}")
 
 	print("Done!")
 
