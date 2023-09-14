@@ -25,7 +25,7 @@ def send_to_telegram(message, file=False,filepath="attachment.json"):
 
 		try:
 			response = requests.post(apiURL, json={'chat_id': chatID, 'text': message})
-			print(response.text)
+			print(json.dumps(response.json(), indent=4))
 		except Exception as e:
 			print(e)
 	else:
@@ -39,7 +39,7 @@ def send_to_telegram(message, file=False,filepath="attachment.json"):
 				apiURL2, 
 				files=files
 			)
-			print(response.text)
+			print(json.dumps(response.json(), indent=4))
 		except Exception as e:
 			print(e)
 
@@ -175,7 +175,12 @@ def process_intents(list_of_dicts):
 
 		# If 'values_str' exists, call the 'get_post_category' function and create a new 'intent' key
 		if values_str is not None:
-			dict_["intent"] = get_post_category(values_str)
+			try:
+				dict_["intent"] = get_post_category(values_str)
+			except Exception as e:
+				print(e, dict_)
+				dict_["intent"] = 'no interest'
+
 
 	# Load existing data from the JSON file
 	try:
@@ -329,7 +334,7 @@ def clear_json_files(json_files):
 
 
 
-def run():
+def main():
 	# Set the file path to 'groups.json'
 	file_path = "groups.json"
 
@@ -344,48 +349,42 @@ def run():
 			# Get the group ID
 			group_id = item["group_id"]
 
-			# Get the group keywords
-			# group_keyword = item["key_words"]
-
 			# Get the last post time
 			group_last_post_time = item["last_post_time"]
 
-			# Use the get_group_post function to get the group posts
-			data = get_group_post(group_id)
+			# Try to get the post but send notification to Telegraam if an error occurs 
+			try:
+				# Use the get_group_post function to get the group posts
+				data = get_group_post(group_id)
 
-			# Search the JSON file to get te most recent posts using datetime_treshold and return last post time
-			datetime_threshold = group_last_post_time
-			results, last_post_time = search_json_files(data, datetime_threshold)
+				# Search the JSON file to get te most recent posts using datetime_treshold and return last post time
+				datetime_threshold = group_last_post_time
+				results, last_post_time = search_json_files(data, datetime_threshold)
 
-			# Update last post time
-			update_last_post_time(file_path, group_id, last_post_time)
+				# Process the Intents of post
+				process_intents(results)
 
-			# Process the Intents of post
-			process_intents(results)
+				#Removes any single quotes from code
+				process_json('output.json')
 
-			#Removes any single quotes from code
-			process_json('output.json')
-
-			# Categorize intents and Send notification of results
-			categorize_intents_and_send_notifications()
-			# time.sleep(20)
+				# Categorize intents and Send notification of results
+				categorize_intents_and_send_notifications()
+				
+				# Update last post time
+				update_last_post_time(file_path, group_id, last_post_time)
+				
+				# Clear the json files for a new group
+				json_files_to_clear = ["output.json","other-posts.json", "data.json", "attachment.json"]
+				clear_json_files(json_files_to_clear)
+			except Exception as e:
+				send_to_telegram(f"There seems to be an error with Group - {group_id} while scraping fro this time treshold - {group_last_post_time}.Please, try to fix before next cycle. \n Heres the error message: {e}")
 
 	print("Done!")
 
 
 
 # Run the code
-run()
 
-# Clear the files for a fresh Run
-# The `run()` function is the main function that executes the entire program. It performs the
-# following steps:
-json_files_to_clear = ["output.json","other-posts.json", "data.json", "attachment.json"]
-clear_json_files(json_files_to_clear)
-
-
-
-
-
-# comment_on_post("https://facebook.com/2126575944262211/posts/3604290879824036","LOL.")
-
+if __name__ == '__main__':
+	main()
+	
