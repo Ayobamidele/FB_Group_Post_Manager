@@ -30,7 +30,7 @@ def send_to_telegram(message, file=False,filepath="attachment.json"):
 		apiURL2 = f'https://api.telegram.org/bot{apiToken}/sendDocument?chat_id={chatID}&caption={message}'
 
 		files = {
-			'document' : open(f'.\\{filepath}' )
+			'document' : open(f'{filepath}' )
 			}
 		try:
 			response = requests.post(
